@@ -22,7 +22,13 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('store', StoreController::class);
-Route::apiResource('user', UserController::class);
-Route::apiResource('product', ProductController::class);
-Route::apiResource('order', OrderController::class);
+Route::post('login', [UserController::class, 'login']);
+Route::post('register', [UserController::class, 'register']);
+Route::group(['middleware' => 'auth:api'], function(){
+    Route::post('details', [UserController::class, 'details']);
+    Route::apiResource('store', StoreController::class);
+    Route::apiResource('user', UserController::class);
+    Route::apiResource('product', ProductController::class);
+    Route::apiResource('order', OrderController::class);
+});
+Route::get('login_required', [UserController::class, 'login_required']);

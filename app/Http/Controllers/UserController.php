@@ -3,9 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Testing\Fluent\Concerns\Has;
+use Illuminate\Support\Facades\Auth;
+use Validator;
+use App\Models\User;
 
 class UserController extends Controller
 {
+
+    public $successStatus = 200;
+
     /**
      * Display a listing of the resource.
      *
@@ -80,5 +89,77 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+    }
+
+
+    /**
+     * login api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function login(){
+        if(Auth::attempt(['email' => request('email'), 'password' => request('password')])) {
+            $user = Auth::user();
+            $success['token'] =  $user->createToken('authToken')->accessToken;
+            return response()->json(['success' => $success], $this->successStatus);
+        }
+        else {
+            return response()->json(['error'=>'Unauthorised'], 401);
+        }
+    }
+
+    /**
+     * Register api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:45',
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+            'c_password' => 'required|same:password',
+            'role' => 'required|max:45|min:2',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['error'=>$validator->errors()], 401);
+        }
+        $input = $request->all();
+        $input['password'] = Hash::make($input['password']);
+        $user = User::create($input);
+        // $success['token'] =  $user->createToken('authToken')->accessToken;
+        // $success['name'] =  $user->name;
+        // return response()->json(['success'=>$success], $this->successStatus);
+
+        $token = $user->createToken('authToken')->accessToken;
+
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($response, 201);
+    }
+
+    /**
+     * details api
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function details()
+    {
+        $user = Auth::user();
+        // return response()->json(['success' => $user], $this->successStatus);
+        $response = [
+            'user' => $user,
+            'status' => $this->successStatus
+        ];
+
+        return response($response, 200);
+    }
+
+    public function login_required() {
+        return response()->json(['error'=>'Unauthorised'], 401);
     }
 }
