@@ -30,5 +30,7 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::apiResource('user', UserController::class);
     Route::apiResource('product', ProductController::class);
     Route::apiResource('order', OrderController::class);
+    Route::post('logout', [UserController::class, 'logoutApi']);
 });
 Route::get('login_required', [UserController::class, 'login_required']);
+

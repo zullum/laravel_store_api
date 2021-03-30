@@ -162,4 +162,19 @@ class UserController extends Controller
     public function login_required() {
         return response()->json(['error'=>'Unauthorised'], 401);
     }
+
+    public function logoutApi(Request $request){
+
+        $user = Auth::user()->token();
+        if($user) {
+            $user->revoke();
+            return response()->json([
+                'message' => 'Successfully logged out'
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'Something went wrong in api'
+        ]);
+    }
 }
