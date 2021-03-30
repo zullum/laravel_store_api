@@ -14,7 +14,7 @@ class StoreController extends Controller
      */
     public function index()
     {
-        return ['response' => 'index for store'];
+        return Store::all();
     }
 
     /**

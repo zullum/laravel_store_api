@@ -22,7 +22,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        return ['response' => 'index for user'];
+        // $users = User::where('role', 'manager')->get()->pluck('id')->toArray();
+        // $users = User::where('role', 'manager')->get();
+        $users = User::all();
+        return $users;
     }
 
     /**
