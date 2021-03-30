@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -22,3 +23,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::apiResource('store', StoreController::class);
 Route::apiResource('user', UserController::class);
+Route::apiResource('product', ProductController::class);
