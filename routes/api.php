@@ -33,7 +33,7 @@ Route::group(['middleware' => ['auth:api', 'role:manager,admin']], function(){
     Route::post('schedule-update/{product}', [ProductController::class, 'scheduleUpdate']);
 });
 
-Route::group(['middleware' => ['auth:api', 'role:customer,admin']], function(){
+Route::group(['middleware' => ['auth:api', 'role:customer']], function(){
     Route::apiResource('order', OrderController::class);
 });
 
