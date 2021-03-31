@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessProduct;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -159,5 +160,43 @@ class ProductController extends Controller
             return response()->json(['response'=>'Product deleted succesfully'], 201);
         }
         return response()->json(['response'=>'Operation delete failed'], 400);
+    }
+
+    public function scheduleUpdate(Request $request, Product $product) {
+        $user = Auth::user();
+        $user_id = $user->id;
+
+        $stores = Store::where('manager_id', $user_id)->get()->pluck('id')->toArray();
+
+        $input_validator = Validator::make($request->all(), [
+            'name' => array_key_exists('name', $request->all()) ? 'required|string' : '',
+            'color' => array_key_exists('color', $request->all()) ?  'required|string' : '',
+            'type' => array_key_exists('type', $request->all()) ?  'required|string' : '',
+            'size' => array_key_exists('size', $request->all()) ?  'required|string' : '',
+            'material' => array_key_exists('material', $request->all()) ?  'required|string' : '',
+            'price' => array_key_exists('price', $request->all()) ?  'required|numeric' : '',
+            'quantity_in_stock' => array_key_exists('quantity_in_stock', $request->all()) ?  'required|integer' : '',
+            'store_id' => [
+                'integer',
+                Rule::in($stores),
+            ],
+            'update_date' => [
+                'required',
+                'date',
+            ],
+        ]);
+        if ($input_validator->fails()) {
+            return response()->json(['error'=>$input_validator->errors()], 400);
+        }
+
+        $delay_time = intval(strtotime($request->update_date)) - intval(strtotime("now"));
+        if($delay_time < 0) {
+            return response()->json(['error'=>'Please enter date greater than current date and time.'], 400);
+        }
+
+        // ProcessProduct::dispatch($product, $request->all())->delay(now()->addMinutes(1));
+        ProcessProduct::dispatch($product, $request->all())->delay($delay_time);
+        // ProcessProduct::dispatch($product, $request->all())->delay(now()->addSeconds(5));
+        return response()->json(['response'=>'Product update scheduled succesfully'], 200);
     }
 }
