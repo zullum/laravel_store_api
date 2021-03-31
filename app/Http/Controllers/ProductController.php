@@ -41,13 +41,6 @@ class ProductController extends Controller
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $user_ar = $user->toArray();
-        $user_validator = Validator::make($user_ar, [
-            'role' => 'required|in:manager',
-        ]);
-        if ($user_validator->fails()) {
-            return response()->json(['error'=>$user_validator->errors()], 400);
-        }
 
         $stores = Store::where('manager_id', $user_id)->get()->pluck('id')->toArray();
 
@@ -119,13 +112,6 @@ class ProductController extends Controller
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $user_ar = $user->toArray();
-        $user_validator = Validator::make($user_ar, [
-            'role' => 'required|in:manager',
-        ]);
-        if ($user_validator->fails()) {
-            return response()->json(['error'=>$user_validator->errors()], 400);
-        }
 
         $stores = Store::where('manager_id', $user_id)->get()->pluck('id')->toArray();
 
