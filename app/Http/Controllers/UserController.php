@@ -22,10 +22,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        // $users = User::where('role', 'manager')->get()->pluck('id')->toArray();
-        // $users = User::where('role', 'manager')->get();
-        $users = User::all();
-        return $users;
+        return User::all();
     }
 
     /**
@@ -46,7 +43,29 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $input_validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'password' => 'required|string',
+            'email' => 'required|email|unique:users',
+            'role' => 'required|string|in:admin,manager,customer',
+        ]);
+        if ($input_validator->fails()) {
+            return response()->json(['error'=>$input_validator->errors()], 400);
+        }
+
+        $user = new User;
+        $user->name = $request->name;
+        $user->password = Hash::make($request->password);
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $result = $user->save();
+
+        if($result) {
+            return response()->json(['response'=>'User created succesfully'], 201);
+        }
+        return response()->json(['response'=>'Operation store failed'], 400);
+
     }
 
     /**
@@ -57,7 +76,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return $user;
     }
 
     /**
@@ -80,7 +99,27 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+
+        $input_validator = Validator::make($request->all(), [
+            'name' => array_key_exists('name', $request->all()) ? 'required|string' : '',
+            'password' => array_key_exists('color', $request->all()) ?  'required|string' : '',
+            'email' => array_key_exists('type', $request->all()) ?  'required|email|unique:users' : '',
+            'role' => array_key_exists('size', $request->all()) ?  'required|string|in:admin,manager,customer' : '',
+        ]);
+        if ($input_validator->fails()) {
+            return response()->json(['error'=>$input_validator->errors()], 400);
+        }
+
+        foreach ($request->all() as $key => $value) {
+
+            $user->{$key} = $value;
+        }
+
+        $result = $user->save();
+        if($result) {
+            return response()->json(['response'=>'User updated succesfully'], 201);
+        }
+        return response()->json(['response'=>'Operation update failed'], 400);
     }
 
     /**
@@ -91,7 +130,11 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $result = $user->delete();
+        if($result) {
+            return response()->json(['response'=>'Product deleted succesfully'], 201);
+        }
+        return response()->json(['response'=>'Operation delete failed'], 400);
     }
 
 
@@ -123,7 +166,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required',
             'c_password' => 'required|same:password',
-            'role' => 'required|max:45|min:2',
+            'role' => 'required|string|in:admin,manager,customer',
         ]);
         if ($validator->fails()) {
             return response()->json(['error'=>$validator->errors()], 401);
@@ -143,23 +186,6 @@ class UserController extends Controller
         ];
 
         return response($response, 201);
-    }
-
-    /**
-     * details api
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function details()
-    {
-        $user = Auth::user();
-        // return response()->json(['success' => $user], $this->successStatus);
-        $response = [
-            'user' => $user,
-            'status' => $this->successStatus
-        ];
-
-        return response($response, 200);
     }
 
     public function login_required() {
