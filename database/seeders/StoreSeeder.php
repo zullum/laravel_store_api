@@ -21,11 +21,13 @@ class StoreSeeder extends Seeder
         // geeting the all available managers
         $users = User::where('role', 'manager')->get()->pluck('id')->toArray();
 
-        $input['name'] = 'Bingo';
-        $input['address'] = $faker->address;
-        // picking a random manager for our first store
-        $input['manager_id'] = $faker->randomElement($users);
+        foreach ($users as $key => $value) {
+            $input['name'] = 'Bingo'.$key;
+            $input['address'] = $faker->address;
+            $input['manager_id'] = $value;
 
-        Store::create($input);
+            Store::create($input);
+        }
+
     }
 }
