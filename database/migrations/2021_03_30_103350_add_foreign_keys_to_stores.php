@@ -14,7 +14,7 @@ class AddForeignKeysToStores extends Migration
     public function up()
     {
         Schema::table('stores', function (Blueprint $table) {
-            $table->foreignId('manager_id')->change()->constrained('stores');
+            $table->foreignId('manager_id')->change()->constrained('users');
         });
     }
 
