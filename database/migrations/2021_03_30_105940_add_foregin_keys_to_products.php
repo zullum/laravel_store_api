@@ -14,7 +14,7 @@ class AddForeginKeysToProducts extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('manager_id')->change()->constrained('users');
+            $table->foreignId('store_id')->change()->constrained('users');
         });
     }
 
@@ -26,7 +26,7 @@ class AddForeginKeysToProducts extends Migration
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropForeign(['manager_id']);
+            $table->dropForeign(['store_id']);
         });
     }
 }
