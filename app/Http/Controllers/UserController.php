@@ -202,7 +202,7 @@ class UserController extends Controller
         return response()->json(['error'=>'Unauthorised'], 401);
     }
 
-    public function logoutApi(Request $request){
+    public function logoutApi(){
 
         $user = Auth::user()->token();
         if($user) {

@@ -24,7 +24,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'register']);
-Route::post('logout', [UserController::class, 'logoutApi']);
 Route::get('login_required', [UserController::class, 'login_required']);
 
 Route::group(['middleware' => ['auth:api', 'role:manager,admin']], function(){
@@ -41,6 +40,7 @@ Route::group(['middleware' => ['auth:api', 'role:customer']], function(){
 Route::group(['middleware' => ['auth:api', 'role:admin,manager,customer']], function(){
     Route::get('order', [OrderController::class, 'index']);
     Route::get('order/{order}', [OrderController::class, 'show']);
+    Route::post('logout', [UserController::class, 'logoutApi']);
 });
 
 Route::group(['middleware' => ['auth:api', 'role:admin']], function(){
