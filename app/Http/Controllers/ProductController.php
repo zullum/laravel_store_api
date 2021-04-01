@@ -19,7 +19,32 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return Product::all();
+
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return Product::all();
+        } else if($role == 'manager') {
+            return Product::join('stores', 'products.store_id', '=', 'stores.id')
+            ->where('stores.manager_id', '=', $user_id)
+            ->select(
+                'products.id',
+                'products.created_at',
+                'products.updated_at',
+                'products.name',
+                'products.price',
+                'products.type',
+                'products.color',
+                'products.size',
+                'products.material',
+                'products.quantity_in_stock',
+                'products.store_id'
+            )
+            ->get();
+        }
+
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -88,7 +113,24 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return $product;
+
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return $product;
+        } else if($role == 'manager') {
+            $managers_products = Product::join('stores', 'products.store_id', '=', 'stores.id')
+            ->where('stores.manager_id', '=', $user_id)
+            ->select('products.id')->get()->pluck('id')->toArray();
+
+            if(in_array($product->id, $managers_products)) {
+                return $product;
+            }
+            return response()->json(['response'=>'You are not authorized to access this resource'], 400);
+        }
+
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -157,7 +199,7 @@ class ProductController extends Controller
     {
         $result = $product->delete();
         if($result) {
-            return response()->json(['response'=>'Product deleted succesfully'], 201);
+            return response()->json(['response'=>'Product deleted succesfully'], 200);
         }
         return response()->json(['response'=>'Operation delete failed'], 400);
     }
@@ -194,9 +236,7 @@ class ProductController extends Controller
             return response()->json(['error'=>'Please enter date greater than current date and time.'], 400);
         }
 
-        // ProcessProduct::dispatch($product, $request->all())->delay(now()->addMinutes(1));
         ProcessProduct::dispatch($product, $request->all())->delay($delay_time);
-        // ProcessProduct::dispatch($product, $request->all())->delay(now()->addSeconds(5));
         return response()->json(['response'=>'Product update scheduled succesfully'], 200);
     }
 }

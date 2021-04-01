@@ -17,7 +17,34 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return Order::all();
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return Order::all();
+        } else if($role == 'manager') {
+            return Order::whereNotNull('store_id')
+            ->join('stores', 'orders.store_id', '=', 'stores.id')
+            ->join('users', 'stores.manager_id', '=', 'users.id')
+            ->where('stores.manager_id', '=', $user_id)
+            ->select(
+                'orders.id',
+                'orders.created_at',
+                'orders.updated_at',
+                'orders.quantity',
+                'orders.price',
+                'orders.status',
+                'orders.store_id',
+                'orders.owner_id',
+                'orders.product_id'
+            )
+            ->get();
+        } else if($role == 'customer') {
+            $orders = Order::where('owner_id', $user_id)->get();
+            return $orders;
+        }
+
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -53,6 +80,12 @@ class OrderController extends Controller
 
         // set new product quantity_in_stock
         $product = Product::find($request->product_id);
+        $product_store_id = $product->store_id;
+        if($request->store_id != $product_store_id) {
+            return response()->json(['response'=>'Requested product is not available at this store.'], 400);
+        }
+
+        // set new product quantity_in_stock
         $current_quantity_in_stock = $product->quantity_in_stock;
         if($current_quantity_in_stock > 0 &&  $current_quantity_in_stock > $request->quantity) {
             $new_quantity_in_stock = $current_quantity_in_stock - $request->quantity;
@@ -88,7 +121,26 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        return $order;
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return $order;
+        } else if($role == 'manager') {
+            $managers_orders =  Order::whereNotNull('store_id')
+            ->join('stores', 'orders.store_id', '=', 'stores.id')
+            ->join('users', 'stores.manager_id', '=', 'users.id')
+            ->where('stores.manager_id', '=', $user_id)
+            ->select('orders.id')
+            ->get()->pluck('id')->toArray();
+            if(in_array($order->id, $managers_orders)) {
+                return $order;
+            }
+            return response()->json(['response'=>'You are not authorized to access this resource'], 400);
+        } else if($role == 'customer' && $order->owner_id == $user_id) {
+            return $order;
+        }
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -138,7 +190,7 @@ class OrderController extends Controller
     {
         $result = $order->delete();
         if($result) {
-            return response()->json(['response'=>'Order deleted succesfully'], 201);
+            return response()->json(['response'=>'Order deleted succesfully'], 200);
         }
         return response()->json(['response'=>'Operation delete failed'], 400);
     }

@@ -16,7 +16,17 @@ class StoreController extends Controller
      */
     public function index()
     {
-        return Store::all();
+
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return Store::all();
+        } else if($role == 'manager') {
+            return Store::where('manager_id', $user_id)->get();
+        }
+
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -78,7 +88,20 @@ class StoreController extends Controller
      */
     public function show(Store $store)
     {
-        return $store;
+        $user = Auth::user();
+        $user_id = $user->id;
+        $role = $user->role;
+        if($role == 'admin') {
+            return $store;
+        } else if($role == 'manager') {
+            $manager_stores = Store::where('manager_id', $user_id)->get()->pluck('id')->toArray();
+            if(in_array($store->id, $manager_stores)) {
+                return $store;
+            }
+            return response()->json(['response'=>'You are not authorized to access this resource'], 400);
+        }
+
+        return response()->json(['response'=>'You are not authorized to access this resource'], 400);
     }
 
     /**
@@ -133,7 +156,7 @@ class StoreController extends Controller
     {
         $result = $store->delete();
         if($result) {
-            return response()->json(['response'=>'Store deleted succesfully'], 201);
+            return response()->json(['response'=>'Store deleted succesfully'], 200);
         }
         return response()->json(['response'=>'Operation delete failed'], 400);
     }

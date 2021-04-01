@@ -34,12 +34,16 @@ Route::group(['middleware' => ['auth:api', 'role:manager,admin']], function(){
 });
 
 Route::group(['middleware' => ['auth:api', 'role:customer']], function(){
-    Route::apiResource('order', OrderController::class);
+    Route::post('order', [OrderController::class, 'store']);
+    Route::put('order/{order}', [OrderController::class, 'update']);
+});
+
+Route::group(['middleware' => ['auth:api', 'role:admin,manager,customer']], function(){
+    Route::get('order', [OrderController::class, 'index']);
+    Route::get('order/{order}', [OrderController::class, 'show']);
 });
 
 Route::group(['middleware' => ['auth:api', 'role:admin']], function(){
     Route::apiResource('user', UserController::class);
+    Route::delete('order/{order}', [OrderController::class, 'destroy']);
 });
-
-Route::get('login_required', [UserController::class, 'login_required']);
-

@@ -17,9 +17,15 @@ class UserSeeder extends Seeder
     public function run()
     {
 
-        $input['name'] = 'sanel';
+        $input['name'] = 'manager1';
         $input['password'] = Hash::make('secret');
-        $input['email'] = 'sanel@test.com';
+        $input['email'] = 'manager1@test.com';
+        $input['role'] = 'manager';
+        User::create($input);
+
+        $input['name'] = 'manager2';
+        $input['password'] = Hash::make('secret');
+        $input['email'] = 'manager2@test.com';
         $input['role'] = 'manager';
         User::create($input);
 

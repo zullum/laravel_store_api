@@ -132,7 +132,7 @@ class UserController extends Controller
     {
         $result = $user->delete();
         if($result) {
-            return response()->json(['response'=>'Product deleted succesfully'], 201);
+            return response()->json(['response'=>'Product deleted succesfully'], 200);
         }
         return response()->json(['response'=>'Operation delete failed'], 400);
     }
