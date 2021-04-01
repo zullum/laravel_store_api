@@ -14,7 +14,7 @@ class AddForeginKeysToProducts extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('store_id')->change()->constrained('users');
+            $table->foreignId('store_id')->change()->constrained('stores');
         });
     }
 
