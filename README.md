@@ -97,3 +97,6 @@ Laravel is accessible, powerful, and provides tools required for large, robust a
 <hr>
 <h2>Wrapping Up</h2>
 <p>That is all you need to do to run this project in your environment.</p>
+
+## QA and Validation Documentation
+- [Goole Slides Document with Validation](https://docs.google.com/presentation/d/16qASeuFcIJ7-txEtz1q49e2ED4F7nQMplgIhKmdCYKQ/edit#slide=id.p).
